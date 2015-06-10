@@ -23,15 +23,33 @@ sub new {
 		apisession => "$ENV{HOME}/.lw/session", 
 	}, $class;
 
-	my $options = $self->options; 
-
 	foreach my $method (qw/help list clean/) { 
 		$self->$method if ($self->{$method}); 
 	} 
-	
+
+	if (grep { '--benchmark' eq $_ } @ARGV) { 
+		$self->benchmark->run; 
+	}
+	else {
+		$self->options;
+	} 
+
 	return $self; 
 }
 
+sub benchmark { 
+	my ($self) = @_;
+	
+	eval { use LiquidWeb::BenchMark }; 
+	if (my $ex = $@) { 
+		die "--benchmark is an unsupported option using your configuration error: [$ex]"; 
+	} 
+	my $benchmark = LiquidWeb::BenchMark->new(
+		username => $self->auth->{username},
+		password => $self->auth->{secret}, 
+	); 
+	return $benchmark; 
+} 
 
 sub configure { 
 	my ($self, $args) = @_; 
@@ -95,10 +113,12 @@ sub options {
 		my %hash = (); 
 		foreach my $key (qw/output version command list/) {
 			$hash{"$key=s"} = \$options->{$key};
-		} 
+		}
+ 
 		foreach my $key (qw/configure help clean/) {
 			$hash{$key} = \$options->{$key};
-		} 
+		}
+
 		my ($inputs, $seen); 
 		foreach my $version (qw/v1 bleed/) {
 			my $docs = do { open my $doc, '<', "$self->{lwhome}/$version.json"; local $/; <$doc> }; 
