@@ -29,8 +29,9 @@ sub new {
 
 	if (grep { '--benchmark' eq $_ } @ARGV) { 
 		$self->benchmark->run; 
-	}
-	else {
+		exit; 
+	} 
+	else { 
 		$self->options;
 	} 
 
