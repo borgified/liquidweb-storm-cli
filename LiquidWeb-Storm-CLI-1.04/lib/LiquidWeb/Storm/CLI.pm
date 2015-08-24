@@ -23,10 +23,6 @@ sub new {
 		apisession => "$ENV{HOME}/.lw/session", 
 	}, $class;
 
-	foreach my $method (qw/help list clean/) { 
-		$self->$method if ($self->{$method}); 
-	} 
-
 	if (grep { '--benchmark' eq $_ } @ARGV) { 
 		$self->benchmark->run; 
 		exit; 
@@ -34,6 +30,10 @@ sub new {
 	else { 
 		$self->options;
 	} 
+
+   foreach my $method (qw/help list clean/) {
+      $self->$method if ($self->{$method});
+   }
 
 	return $self; 
 }
